@@ -372,10 +372,7 @@ impl InstanceRunner {
                     use InstanceMonitorRequest::*;
                     match request {
                         Some(Update { state, tx }) => {
-                            let observed = ObservedPropolisState::new(
-                                self.state.instance(),
-                                &state,
-                            );
+                            let observed = ObservedPropolisState::from(state);
                             let reaction = self.observe_state(&observed).await;
                             self.publish_state_to_nexus().await;
 

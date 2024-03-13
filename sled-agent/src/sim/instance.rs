@@ -20,7 +20,8 @@ use omicron_common::api::internal::nexus::{
     InstanceRuntimeState, SledInstanceState,
 };
 use propolis_client::types::{
-    InstanceMigrateStatusResponse as PropolisMigrateStatus,
+    InstanceMigrateStatusResponse as PropolisMigrateStatusResponse,
+    InstanceMigrationStatus as PropolisMigrationStatus,
     InstanceState as PropolisInstanceState, InstanceStateMonitorResponse,
 };
 use std::collections::VecDeque;
@@ -30,10 +31,20 @@ use uuid::Uuid;
 
 use crate::common::instance::{Action as InstanceAction, InstanceStates};
 
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug)]
+enum MigrationDirection {
+    In,
+    Out,
+}
+
 #[derive(Clone, Debug)]
 enum MonitorChange {
     InstanceState(PropolisInstanceState),
-    MigrateStatus(PropolisMigrateStatus),
+    MigrateStatus {
+        direction: MigrationDirection,
+        status: PropolisMigrationStatus,
+    },
 }
 
 /// A simulation of an Instance created by the external Oxide API.
@@ -74,9 +85,11 @@ impl SimInstanceInner {
     /// Pushes a Propolis migration status to the state change queue.
     fn queue_migration_status(
         &mut self,
-        migrate_status: PropolisMigrateStatus,
+        direction: MigrationDirection,
+        status: PropolisMigrationStatus,
     ) {
-        self.queue.push_back(MonitorChange::MigrateStatus(migrate_status))
+        self.queue
+            .push_back(MonitorChange::MigrateStatus { direction, status });
     }
 
     /// Searches the queue for its last Propolis state change transition. If
@@ -130,14 +143,20 @@ impl SimInstanceInner {
                         self
                     )
                     });
-                self.queue_migration_status(PropolisMigrateStatus {
-                    migration_id,
-                    state: propolis_client::types::MigrationState::Sync,
-                });
-                self.queue_migration_status(PropolisMigrateStatus {
-                    migration_id,
-                    state: propolis_client::types::MigrationState::Finish,
-                });
+                self.queue_migration_status(
+                    MigrationDirection::In,
+                    PropolisMigrationStatus {
+                        id: migration_id,
+                        state: propolis_client::types::MigrationState::Sync,
+                    },
+                );
+                self.queue_migration_status(
+                    MigrationDirection::In,
+                    PropolisMigrationStatus {
+                        id: migration_id,
+                        state: propolis_client::types::MigrationState::Finish,
+                    },
+                );
                 self.queue_propolis_state(PropolisInstanceState::Running);
             }
             InstanceStateRequested::Running => {
@@ -255,14 +274,22 @@ impl SimInstanceInner {
                     }
                     self.last_response.state = state;
                 }
-                MonitorChange::MigrateStatus(status) => {
-                    self.last_response.migration = Some(status);
+                MonitorChange::MigrateStatus { direction, status } => {
+                    match direction {
+                        MigrationDirection::In => {
+                            self.last_response.migration.migration_in =
+                                Some(status);
+                        }
+                        MigrationDirection::Out => {
+                            self.last_response.migration.migration_out =
+                                Some(status);
+                        }
+                    }
                 }
             }
 
-            self.state.apply_propolis_observation(&ObservedPropolisState::new(
-                &self.state.instance(),
-                &self.last_response,
+            self.state.apply_propolis_observation(&ObservedPropolisState::from(
+                self.last_response.clone(),
             ))
         } else {
             None
@@ -435,7 +462,10 @@ impl Simulatable for SimInstance {
                 last_response: InstanceStateMonitorResponse {
                     gen: 1,
                     state: PropolisInstanceState::Starting,
-                    migration: None,
+                    migration: PropolisMigrateStatusResponse {
+                        migration_in: None,
+                        migration_out: None,
+                    },
                 },
                 queue: VecDeque::new(),
                 destroyed: false,
