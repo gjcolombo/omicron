@@ -149,3 +149,57 @@ impl MemoryReservations {
         vmm_eligible
     }
 }
+
+/// Detects the current sled's CPU family using the CPUID instruction.
+#[cfg(target_arch = "x86_64")]
+pub fn detect_cpu_family(log: &Logger) -> sled_hardware_types::CpuFamily {
+    use core::arch::x86_64::__cpuid_count;
+    use sled_hardware_types::CpuFamily;
+
+    // Read leaf 0 to figure out the processor's vendor and whether leaf 1
+    // (which contains family, model, and stepping information) is available.
+    let leaf_0 = unsafe { __cpuid_count(0, 0) };
+
+    info!(log, "read CPUID leaf 0 to detect CPU vendor"; "values" => ?leaf_0);
+
+    // If leaf 1 is unavailable, there's no way to figure out what family this
+    // processor belongs to.
+    if leaf_0.eax < 1 {
+        return CpuFamily::Unknown;
+    }
+
+    // Check the vendor ID string in ebx/ecx/edx.
+    match (leaf_0.ebx, leaf_0.ecx, leaf_0.edx) {
+        // "AuthenticAMD"; see AMD APM volume 3 (March 2024) section E.3.1.
+        (0x68747541, 0x444D4163, 0x69746E65) => {}
+        _ => return CpuFamily::Unknown,
+    }
+
+    // Per AMD APM volume 3 (March 2024) section E.3.2, the processor family
+    // number is computed as follows:
+    //
+    // - Read bits 7:4 of leaf 1 eax to get the "base" family value. If this
+    //   value is less than 0xF, the family value is equal to the base family
+    //   value.
+    // - If the base family value is 0xF, eax[27:20] contains the "extended"
+    //   family value, and the actual family value is the sum of the base and
+    //   the extended values.
+    let leaf_1 = unsafe { __cpuid_count(1, 0) };
+    let mut family = (leaf_1.eax & 0x00000F00) >> 8;
+    if family == 0xF {
+        family += (leaf_1.eax & 0x0FF00000) >> 20;
+    }
+
+    info!(
+        log,
+        "read CPUID leaf 1 to detect CPU family";
+        "values" => ?leaf_1,
+        "family" => family
+    );
+
+    match family {
+        0x19 => CpuFamily::AmdFamily19h,
+        0x1A => CpuFamily::AmdFamily1Ah,
+        _ => CpuFamily::Unknown,
+    }
+}

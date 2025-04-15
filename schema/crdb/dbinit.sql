@@ -187,6 +187,21 @@ CREATE TYPE IF NOT EXISTS omicron.public.sled_state AS ENUM (
     'decommissioned'
 );
 
+-- The model of CPU installed in a particular sled, discovered by sled-agent
+-- and reported to Nexus. This determines what VMs can run on a sled: instances
+-- that require a specific minimum CPU platform can only run on sleds whose
+-- CPUs support all the features of that platform.
+CREATE TYPE IF NOT EXISTS omicron.public.sled_cpu_family AS ENUM (
+    -- Sled-agent didn't recognize the sled's CPU.
+    'unknown',
+
+    -- AMD family 25 (19h) processors, including Zen 3 and Zen 4 parts.
+    'amd_family_19h',
+
+    -- AMD family 26 (1Ah) processors, including Zen 5 parts.
+    'amd_family_19h'
+);
+
 CREATE TABLE IF NOT EXISTS omicron.public.sled (
     /* Identity metadata (asset) */
     id UUID PRIMARY KEY,
@@ -229,7 +244,10 @@ CREATE TABLE IF NOT EXISTS omicron.public.sled (
 
     /* The bound port of the Repo Depot API server, running on the same IP as
        the sled agent server. */
-    repo_depot_port INT4 CHECK (port BETWEEN 0 AND 65535) NOT NULL
+    repo_depot_port INT4 CHECK (port BETWEEN 0 AND 65535) NOT NULL,
+
+    /* The sled's detected CPU family. */
+    cpu_family omicron.public.sled_cpu_family NOT NULL
 );
 
 -- Add an index that ensures a given physical sled (identified by serial and
@@ -5504,7 +5522,7 @@ INSERT INTO omicron.public.db_metadata (
     version,
     target_version
 ) VALUES
-    (TRUE, NOW(), NOW(), '140.0.0', NULL)
+    (TRUE, NOW(), NOW(), '141.0.0', NULL)
 ON CONFLICT DO NOTHING;
 
 COMMIT;

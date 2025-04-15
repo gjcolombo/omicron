@@ -6281,6 +6281,14 @@
               }
             ]
           },
+          "cpu_family": {
+            "description": "The family of the sled's CPU.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SledCpuFamily"
+              }
+            ]
+          },
           "decommissioned": {
             "description": "Whether the sled-agent has been decommissioned by nexus\n\nThis flag is only set to true by nexus. Setting it on an upsert from sled-agent has no effect.",
             "type": "boolean"
@@ -6336,6 +6344,7 @@
         },
         "required": [
           "baseboard",
+          "cpu_family",
           "decommissioned",
           "generation",
           "repo_depot_port",
@@ -6344,6 +6353,32 @@
           "sa_address",
           "usable_hardware_threads",
           "usable_physical_ram"
+        ]
+      },
+      "SledCpuFamily": {
+        "description": "Identifies the kind of CPU present on a sled, determined by reading CPUID.",
+        "oneOf": [
+          {
+            "description": "The CPU vendor or its family number don't correspond to any of the known family variants.",
+            "type": "string",
+            "enum": [
+              "unknown"
+            ]
+          },
+          {
+            "description": "AMD family 19h (family 25) processors, including Zen 3 and Zen 4 parts.",
+            "type": "string",
+            "enum": [
+              "amd_family19h"
+            ]
+          },
+          {
+            "description": "AMD family 1Ah (family 26) processors, including Zen 5 parts.",
+            "type": "string",
+            "enum": [
+              "amd_family1_ah"
+            ]
+          }
         ]
       },
       "SledId": {

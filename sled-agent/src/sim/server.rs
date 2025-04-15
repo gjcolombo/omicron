@@ -166,6 +166,7 @@ impl Server {
                                 config.hardware.reservoir_ram,
                             )
                             .unwrap(),
+                            cpu_family: NexusTypes::SledCpuFamily::Unknown,
                             generation: Generation::new(),
                             decommissioned: false,
                         },

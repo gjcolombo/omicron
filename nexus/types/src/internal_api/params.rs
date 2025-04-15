@@ -30,6 +30,21 @@ use std::net::SocketAddr;
 use std::net::SocketAddrV6;
 use uuid::Uuid;
 
+/// Identifies the kind of CPU present on a sled, determined by reading CPUID.
+#[derive(Serialize, Deserialize, Debug, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum SledCpuFamily {
+    /// The CPU vendor or its family number don't correspond to any of the
+    /// known family variants.
+    Unknown,
+
+    /// AMD family 19h (family 25) processors, including Zen 3 and Zen 4 parts.
+    AmdFamily19h,
+
+    /// AMD family 1Ah (family 26) processors, including Zen 5 parts.
+    AmdFamily1Ah,
+}
+
 /// Sent by a sled agent to Nexus to inform about resources
 #[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct SledAgentInfo {
@@ -55,6 +70,9 @@ pub struct SledAgentInfo {
     ///
     /// Must be smaller than "usable_physical_ram"
     pub reservoir_size: ByteCount,
+
+    /// The family of the sled's CPU.
+    pub cpu_family: SledCpuFamily,
 
     /// The generation number of this request from sled-agent
     pub generation: Generation,
