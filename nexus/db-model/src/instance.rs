@@ -7,6 +7,7 @@ use super::{
     ByteCount, Disk, ExternalIp, Generation, InstanceAutoRestartPolicy,
     InstanceCpuCount, InstanceState, Vmm, VmmState,
 };
+use crate::InstanceMinimumCpuPlatform;
 use crate::collection::DatastoreAttachTargetConfig;
 use crate::serde_time_delta::optional_time_delta;
 use chrono::{DateTime, TimeDelta, Utc};
@@ -67,6 +68,9 @@ pub struct Instance {
     /// The primary boot disk for this instance.
     #[diesel(column_name = boot_disk_id)]
     pub boot_disk_id: Option<Uuid>,
+
+    /// The instance's minimum required CPU platform.
+    pub min_cpu_platform: Option<InstanceMinimumCpuPlatform>,
 
     #[diesel(embed)]
     pub runtime_state: InstanceRuntimeState,
@@ -139,6 +143,7 @@ impl Instance {
             // Intentionally ignore `params.boot_disk_id` here: we can't set
             // `boot_disk_id` until the referenced disk is attached.
             boot_disk_id: None,
+            min_cpu_platform: params.min_cpu_platform.map(Into::into),
 
             runtime_state,
             intended_state,

@@ -41,6 +41,7 @@ define_enums! {
     IdentityProviderTypeEnum => "provider_type",
     IdentityTypeEnum => "identity_type",
     InstanceAutoRestartPolicyEnum => "instance_auto_restart",
+    InstanceMinimumCpuPlatformEnum => "instance_min_cpu_platform",
     InstanceStateEnum => "instance_state_v2",
     InstanceIntendedStateEnum => "instance_intended_state",
     IpAttachStateEnum => "ip_attach_state",

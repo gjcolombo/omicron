@@ -1247,6 +1247,10 @@ pub struct Instance {
 
     #[serde(flatten)]
     pub auto_restart_status: InstanceAutoRestartStatus,
+
+    /// The minimum required CPU platform for this instance. If this is `null`,
+    /// the instance requires no particular CPU platform.
+    pub min_cpu_platform: Option<InstanceMinimumCpuPlatform>,
 }
 
 /// Status of control-plane driven automatic failure recovery for this instance.
@@ -1309,6 +1313,28 @@ pub enum InstanceAutoRestartPolicy {
     /// best-effort attempt to restart it. The control plane may choose not to
     /// restart the instance to preserve the overall availability of the system.
     BestEffort,
+}
+
+/// A minimum required CPU platform for an instance.
+///
+/// If an instance specifies a minimum required CPU platform, its VMs may make
+/// use of all of the CPU features supplied by that minimum platform. In
+/// exchange, the control plane must ensure that the instance always runs on
+/// hosts whose CPUs support all of those features. This may cause an instance
+/// to be unable to start for want of capacity on a host with the required CPU
+/// features.
+///
+/// If an instance does not specify a minimum CPU platform, then when it starts,
+/// the control plane selects a host for it and then supplies a CPU platform
+/// that is compatible with that host and that maximizes the number of hosts the
+/// instance could validly migrate to.
+#[derive(
+    Copy, Clone, Debug, Deserialize, Serialize, JsonSchema, Eq, PartialEq,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum InstanceMinimumCpuPlatform {
+    /// An AMD Zen 3-compatible CPU platform.
+    AmdMilan,
 }
 
 // AFFINITY GROUPS

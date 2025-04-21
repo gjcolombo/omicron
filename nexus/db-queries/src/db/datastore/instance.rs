@@ -265,6 +265,7 @@ impl From<InstanceAndActiveVmm> for external::Instance {
                 .parse()
                 .expect("found invalid hostname in the database"),
             boot_disk_id: value.instance.boot_disk_id,
+            min_cpu_platform: value.instance.min_cpu_platform.map(Into::into),
             runtime: external::InstanceRuntimeState {
                 run_state: value.effective_state(),
                 time_run_state_updated,
