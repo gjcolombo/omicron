@@ -199,7 +199,7 @@ CREATE TYPE IF NOT EXISTS omicron.public.sled_cpu_family AS ENUM (
     'amd_family_19h',
 
     -- AMD family 26 (1Ah) processors, including Zen 5 parts.
-    'amd_family_19h'
+    'amd_family_1Ah'
 );
 
 CREATE TABLE IF NOT EXISTS omicron.public.sled (
@@ -4430,6 +4430,11 @@ CREATE INDEX IF NOT EXISTS lookup_anti_affinity_group_instance_membership_by_ins
     instance_id
 );
 
+CREATE TYPE IF NOT EXISTS omicron.public.vmm_cpu_platform AS ENUM (
+  'sled_default',
+  'amd_milan'
+);
+
 -- Per-VMM state.
 CREATE TABLE IF NOT EXISTS omicron.public.vmm (
     id UUID PRIMARY KEY,
@@ -4442,7 +4447,7 @@ CREATE TABLE IF NOT EXISTS omicron.public.vmm (
     propolis_ip INET NOT NULL,
     propolis_port INT4 NOT NULL CHECK (propolis_port BETWEEN 0 AND 65535) DEFAULT 12400,
     state omicron.public.vmm_state NOT NULL,
-    cpu_platform omicron.public.instance_min_cpu_platform
+    cpu_platform omicron.public.vmm_cpu_platform
 );
 
 CREATE INDEX IF NOT EXISTS lookup_vmms_by_sled_id ON omicron.public.vmm (

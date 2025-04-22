@@ -211,6 +211,39 @@ async fn sis_create_vmm_record(
     let sled_id = sagactx.lookup::<SledUuid>("sled_id")?;
     let propolis_ip = sagactx.lookup::<Ipv6Addr>("propolis_ip")?;
 
+    // If the instance supplied a minimum CPU platform, record that as the VMM's
+    // required platform, irrespective of what sled was picked. (This allows a
+    // VM to land on a "better" sled than its minimum requirement and migrate
+    // back to a minimum-required sled later.)
+    //
+    // If the instance didn't supply a minimum CPU platform, select one for this
+    // VMM by looking up the chosen sled and selecting the "minimum compatible
+    // platform" for sleds of that lineage. This maximizes the number of sleds
+    // that can host the VMM if it needs to migrate in the future. Selecting the
+    // sled first and then deriving the platform is meant to support
+    // heterogeneous deployments: if a deployment contains some sleds with CPUs
+    // from vendor A, and some with CPUs from vendor B, then selecting the sled
+    // first implicitly chooses a vendor, and then the "minimum compatible"
+    // computation selects the most compatible platform that can run on sleds
+    // with CPUs from that vendor.
+    let cpu_platform =
+        if let Some(cpu_platform) = params.db_instance.min_cpu_platform {
+            cpu_platform.into()
+        } else {
+            let (.., sled) = osagactx
+                .nexus()
+                .sled_lookup(
+                    &osagactx.nexus().opctx_alloc,
+                    &sled_id.into_untyped_uuid(),
+                )
+                .map_err(ActionError::action_failed)?
+                .fetch()
+                .await
+                .map_err(ActionError::action_failed)?;
+
+            sled.cpu_family.minimum_compatible_platform()
+        };
+
     super::instance_common::create_and_insert_vmm_record(
         osagactx.datastore(),
         &opctx,
@@ -218,6 +251,7 @@ async fn sis_create_vmm_record(
         propolis_id,
         sled_id,
         propolis_ip,
+        cpu_platform,
     )
     .await
 }
@@ -843,6 +877,7 @@ mod test {
                 external_ips: vec![],
                 disks: vec![],
                 boot_disk: None,
+                min_cpu_platform: None,
                 start: false,
                 auto_restart_policy: Default::default(),
                 anti_affinity_groups: Vec::new(),

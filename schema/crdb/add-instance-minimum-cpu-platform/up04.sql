@@ -1,1 +1,3 @@
-ALTER TABLE omicron.public.vmm ALTER COLUMN min_cpu_platform DROP DEFAULT;
+ALTER TABLE omicron.public.vmm 
+  ADD COLUMN IF NOT EXISTS cpu_platform omicron.public.vmm_cpu_platform
+  DEFAULT 'sled_default';

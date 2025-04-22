@@ -2337,7 +2337,7 @@ mod tests {
     use futures::{SinkExt, StreamExt};
     use nexus_db_model::{
         Instance as DbInstance, InstanceState as DbInstanceState,
-        VmmState as DbVmmState,
+        VmmCpuPlatform, VmmState as DbVmmState,
     };
     use omicron_common::api::external::{
         Hostname, IdentityMetadataCreateParams, InstanceCpuCount, Name,
@@ -2459,6 +2459,7 @@ mod tests {
             external_ips: vec![],
             disks: vec![],
             boot_disk: None,
+            min_cpu_platform: None,
             ssh_public_keys: None,
             start: false,
             auto_restart_policy: Default::default(),
@@ -2478,6 +2479,7 @@ mod tests {
             ipnetwork::IpNetwork::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0)
                 .unwrap(),
             0,
+            VmmCpuPlatform::SledDefault,
         );
 
         (instance, vmm)

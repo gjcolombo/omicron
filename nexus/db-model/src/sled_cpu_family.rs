@@ -22,8 +22,27 @@ impl_enum_type!(
 
     Unknown => b"unknown"
     AmdFamily19h => b"amd_family_19h"
-    AmdFamily1Ah => b"amd_family_1ah"
+    AmdFamily1Ah => b"amd_family_1Ah"
 );
+
+impl SledCpuFamily {
+    /// Yields the minimum compatible instance CPU platform that can run on this
+    /// sled.
+    ///
+    /// Each instance CPU platform has a set `C` of sled CPU families that can
+    /// host it. The "minimum compatible platform" is the instance CPU platform
+    /// for which (a) `self` is in `C`, and (b) `C` is of maximum cardinality.
+    /// That is: the minimum compatible platform is chosen so that a VMM that
+    /// uses it can run on sleds of this family and as many other families as
+    /// possible.
+    pub fn minimum_compatible_platform(&self) -> crate::VmmCpuPlatform {
+        match self {
+            Self::Unknown => crate::VmmCpuPlatform::SledDefault,
+            Self::AmdFamily19h => crate::VmmCpuPlatform::AmdMilan,
+            Self::AmdFamily1Ah => crate::VmmCpuPlatform::SledDefault,
+        }
+    }
+}
 
 impl From<nexus_types::internal_api::params::SledCpuFamily> for SledCpuFamily {
     fn from(value: nexus_types::internal_api::params::SledCpuFamily) -> Self {

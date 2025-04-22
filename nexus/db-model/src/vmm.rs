@@ -13,7 +13,7 @@
 //! sled agent or that sled agent will never update (like the sled ID).
 
 use super::{Generation, VmmState};
-use crate::{InstanceMinimumCpuPlatform, SqlU16};
+use crate::{SqlU16, VmmCpuPlatform};
 use chrono::{DateTime, Utc};
 use nexus_db_schema::schema::vmm;
 use omicron_uuid_kinds::{GenericUuid, InstanceUuid, PropolisUuid, SledUuid};
@@ -58,7 +58,7 @@ pub struct Vmm {
     /// The CPU platform for this VMM. This may be chosen implicitly by the
     /// control plane if this VMM's instance didn't specify a required platform
     /// when it was started.
-    pub cpu_platform: InstanceMinimumCpuPlatform,
+    pub cpu_platform: VmmCpuPlatform,
 
     /// Runtime state for the VMM.
     #[diesel(embed)]
@@ -76,7 +76,7 @@ impl Vmm {
         sled_id: SledUuid,
         propolis_ip: ipnetwork::IpNetwork,
         propolis_port: u16,
-        cpu_platform: InstanceMinimumCpuPlatform,
+        cpu_platform: VmmCpuPlatform,
     ) -> Self {
         let now = Utc::now();
 

@@ -80,6 +80,7 @@ define_enums! {
     UpstairsRepairNotificationTypeEnum => "upstairs_repair_notification_type",
     UpstairsRepairTypeEnum => "upstairs_repair_type",
     UserProvisionTypeEnum => "user_provision_type",
+    VmmCpuPlatformEnum => "vmm_cpu_platform",
     VmmStateEnum => "vmm_state",
     VolumeResourceUsageTypeEnum => "volume_resource_usage_type",
     VpcFirewallRuleActionEnum => "vpc_firewall_rule_action",

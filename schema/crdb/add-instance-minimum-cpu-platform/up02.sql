@@ -1,1 +1,4 @@
-ALTER TABLE omicron.public.instance ADD COLUMN IF NOT EXISTS min_cpu_platform;
+CREATE TYPE IF NOT EXISTS omicron.public.vmm_cpu_platform AS ENUM (
+  'sled_default',
+  'amd_milan'
+);

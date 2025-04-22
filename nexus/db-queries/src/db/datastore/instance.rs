@@ -2172,6 +2172,7 @@ mod tests {
     use nexus_db_lookup::LookupPath;
     use nexus_db_model::InstanceState;
     use nexus_db_model::Project;
+    use nexus_db_model::VmmCpuPlatform;
     use nexus_db_model::VmmRuntimeState;
     use nexus_db_model::VmmState;
     use nexus_types::external_api::params;
@@ -2235,6 +2236,7 @@ mod tests {
                         external_ips: Vec::new(),
                         disks: Vec::new(),
                         boot_disk: None,
+                        min_cpu_platform: None,
                         ssh_public_keys: None,
                         start: false,
                         auto_restart_policy: Default::default(),
@@ -2847,6 +2849,7 @@ mod tests {
                     sled_id: Uuid::new_v4(),
                     propolis_ip: "10.1.9.32".parse().unwrap(),
                     propolis_port: 420.into(),
+                    cpu_platform: VmmCpuPlatform::SledDefault,
                     runtime: VmmRuntimeState {
                         time_state_updated: Utc::now(),
                         gen: Generation::new(),
@@ -2909,6 +2912,7 @@ mod tests {
                     sled_id: Uuid::new_v4(),
                     propolis_ip: "10.1.9.42".parse().unwrap(),
                     propolis_port: 666.into(),
+                    cpu_platform: VmmCpuPlatform::SledDefault,
                     runtime: VmmRuntimeState {
                         time_state_updated: Utc::now(),
                         gen: Generation::new(),
@@ -3006,6 +3010,7 @@ mod tests {
                     sled_id: Uuid::new_v4(),
                     propolis_ip: "10.1.9.32".parse().unwrap(),
                     propolis_port: 420.into(),
+                    cpu_platform: VmmCpuPlatform::SledDefault,
                     runtime: VmmRuntimeState {
                         time_state_updated: Utc::now(),
                         r#gen: Generation::new(),
@@ -3046,6 +3051,7 @@ mod tests {
                     sled_id: Uuid::new_v4(),
                     propolis_ip: "10.1.9.42".parse().unwrap(),
                     propolis_port: 420.into(),
+                    cpu_platform: VmmCpuPlatform::SledDefault,
                     runtime: VmmRuntimeState {
                         time_state_updated: Utc::now(),
                         r#gen: Generation::new(),
@@ -3148,6 +3154,7 @@ mod tests {
                     sled_id: Uuid::new_v4(),
                     propolis_ip: "10.1.9.42".parse().unwrap(),
                     propolis_port: 420.into(),
+                    cpu_platform: VmmCpuPlatform::SledDefault,
                     runtime: VmmRuntimeState {
                         time_state_updated: Utc::now(),
                         r#gen: Generation::new(),
@@ -3294,6 +3301,7 @@ mod tests {
                             sled_id,
                             propolis_ip: "10.1.9.42".parse().unwrap(),
                             propolis_port: 420.into(),
+                            cpu_platform: VmmCpuPlatform::SledDefault,
                             runtime: VmmRuntimeState {
                                 time_state_updated: Utc::now(),
                                 r#gen: Generation::new(),
