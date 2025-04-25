@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+use crate::SledCpuFamily;
+
 use super::impl_enum_type;
 use serde::{Deserialize, Serialize};
 
@@ -22,6 +24,19 @@ impl_enum_type!(
 
     AmdMilan => b"amd_milan"
 );
+
+impl InstanceMinimumCpuPlatform {
+    /// Returns a slice containing the set of sled CPU families that can
+    /// accommodate an instance with this minimum CPU platform.
+    pub fn compatible_sled_cpu_families(&self) -> &[SledCpuFamily] {
+        match self {
+            // Milan-based instances can run on both family 19h and family 1Ah.
+            Self::AmdMilan => {
+                &[SledCpuFamily::AmdFamily19h, SledCpuFamily::AmdFamily1Ah]
+            }
+        }
+    }
+}
 
 impl From<omicron_common::api::external::InstanceMinimumCpuPlatform>
     for InstanceMinimumCpuPlatform
