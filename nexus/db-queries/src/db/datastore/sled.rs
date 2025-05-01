@@ -476,7 +476,9 @@ impl DataStore {
         // Note that this is not transactional, to reduce contention.
         // However, that lack of transactionality means we need to validate
         // our constraints again when we later try to INSERT the reservation.
-        let possible_sleds = sled_find_targets_query(instance_id, &resources)
+        //
+        // TODO(gjc) maximize power!!!
+        let possible_sleds = sled_find_targets_query(instance_id, &resources, None)
             .get_results_async::<(
                 // Sled UUID
                 Uuid,
@@ -1499,7 +1501,7 @@ pub(in crate::db::datastore) mod test {
         ) -> Vec<FindTargetsOutput> {
             assert!(self.force_onto_sled.is_none());
 
-            sled_find_targets_query(self.id, &self.resources)
+            sled_find_targets_query(self.id, &self.resources, None)
                 .get_results_async::<(
                     Uuid,
                     bool,
