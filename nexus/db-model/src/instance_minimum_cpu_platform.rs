@@ -28,7 +28,7 @@ impl_enum_type!(
 impl InstanceMinimumCpuPlatform {
     /// Returns a slice containing the set of sled CPU families that can
     /// accommodate an instance with this minimum CPU platform.
-    pub fn compatible_sled_cpu_families(&self) -> &[SledCpuFamily] {
+    pub fn compatible_sled_cpu_families(&self) -> &'static [SledCpuFamily] {
         match self {
             // Milan-based instances can run on both family 19h and family 1Ah.
             Self::AmdMilan => {

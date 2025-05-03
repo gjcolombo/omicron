@@ -110,6 +110,12 @@ pub fn sled_find_targets_query(
         ",
     );
 
+    // TODO(gjc): eww. the correct way to do this is to write this as
+    //
+    // "AND sled.cpu_family = ANY ("
+    //
+    // and then just have one `param` which can be bound to a
+    // `sql_types::Array<SledCpuFamilyEnum>`
     if let Some(families) = sled_families {
         query.sql(" AND sled.cpu_family IN (");
         for i in 0..families.len() {

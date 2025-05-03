@@ -476,9 +476,7 @@ impl DataStore {
         // Note that this is not transactional, to reduce contention.
         // However, that lack of transactionality means we need to validate
         // our constraints again when we later try to INSERT the reservation.
-        //
-        // TODO(gjc) maximize power!!!
-        let possible_sleds = sled_find_targets_query(instance_id, &resources, None)
+        let possible_sleds = sled_find_targets_query(instance_id, &resources, constraints.cpu_families())
             .get_results_async::<(
                 // Sled UUID
                 Uuid,
@@ -1082,11 +1080,11 @@ pub(in crate::db::datastore) mod test {
     use anyhow::{Context, Result};
     use itertools::Itertools;
     use nexus_db_lookup::LookupPath;
-    use nexus_db_model::Generation;
-    use nexus_db_model::PhysicalDisk;
     use nexus_db_model::PhysicalDiskKind;
     use nexus_db_model::PhysicalDiskPolicy;
     use nexus_db_model::PhysicalDiskState;
+    use nexus_db_model::{Generation, SledCpuFamily};
+    use nexus_db_model::{InstanceMinimumCpuPlatform, PhysicalDisk};
     use nexus_types::identity::Asset;
     use nexus_types::identity::Resource;
     use omicron_common::api::external;
@@ -1474,6 +1472,7 @@ pub(in crate::db::datastore) mod test {
         groups: Vec<GroupName>,
         force_onto_sled: Option<SledUuid>,
         resources: db::model::Resources,
+        min_cpu_platform: Option<db::model::InstanceMinimumCpuPlatform>,
     }
 
     struct FindTargetsOutput {
@@ -1490,6 +1489,7 @@ pub(in crate::db::datastore) mod test {
                 groups: vec![],
                 force_onto_sled: None,
                 resources: small_resource_request(),
+                min_cpu_platform: None,
             }
         }
 
@@ -1501,7 +1501,10 @@ pub(in crate::db::datastore) mod test {
         ) -> Vec<FindTargetsOutput> {
             assert!(self.force_onto_sled.is_none());
 
-            sled_find_targets_query(self.id, &self.resources, None)
+            let families =
+                self.min_cpu_platform.map(|p| p.compatible_sled_cpu_families());
+
+            sled_find_targets_query(self.id, &self.resources, families)
                 .get_results_async::<(
                     Uuid,
                     bool,
@@ -2644,6 +2647,37 @@ pub(in crate::db::datastore) mod test {
 
         db.terminate().await;
         logctx.cleanup_successful();
+    }
+
+    #[tokio::test]
+    async fn sled_reservation_cpu_constraints() {
+        let logctx = dev::test_setup_log(
+            "sled_reservation_concurrent_space_requirement",
+        );
+        let db = TestDatabase::new_with_datastore(&logctx.log).await;
+        let (opctx, datastore) = (db.opctx(), db.datastore());
+        let (_authz_project, _project) =
+            create_project(&opctx, &datastore, "project").await;
+
+        let mut sleds = vec![];
+        for family in [SledCpuFamily::AmdFamily19h, SledCpuFamily::AmdFamily1Ah]
+        {
+            for _ in 0..2 {
+                let mut builder = SledUpdateBuilder::new();
+                builder.rack_id(rack_id());
+                builder.hardware().cpu_family(family);
+                let (sled, _) =
+                    datastore.sled_upsert(builder.build()).await.unwrap();
+                sleds.push(sled);
+            }
+        }
+
+        let mut test_instance = Instance::new();
+        for platform in [None, Some(InstanceMinimumCpuPlatform::AmdMilan)] {
+            test_instance.min_cpu_platform = platform;
+            let possible_sleds = test_instance.find_targets(&datastore).await;
+            assert_eq!(possible_sleds.len(), 4);
+        }
     }
 
     async fn lookup_physical_disk(
