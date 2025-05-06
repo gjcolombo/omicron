@@ -25,6 +25,7 @@ impl_enum_type!(
 
     SledDefault => b"sled_default"
     AmdMilan => b"amd_milan"
+    AmdTurin => b"amd_turin"
 );
 
 impl VmmCpuPlatform {
@@ -39,6 +40,7 @@ impl VmmCpuPlatform {
                 SledCpuFamily::AmdFamily19h,
                 SledCpuFamily::AmdFamily1Ah,
             ]),
+            Self::AmdTurin => Some(&[SledCpuFamily::AmdFamily1Ah]),
 
             // VMMs get the "sled default" CPU platform when an instance starts
             // up on a sled that hasn't reported a well-known CPU family. Assume
@@ -53,6 +55,7 @@ impl From<InstanceMinimumCpuPlatform> for VmmCpuPlatform {
     fn from(value: InstanceMinimumCpuPlatform) -> Self {
         match value {
             InstanceMinimumCpuPlatform::AmdMilan => Self::AmdMilan,
+            InstanceMinimumCpuPlatform::AmdTurin => Self::AmdTurin,
         }
     }
 }

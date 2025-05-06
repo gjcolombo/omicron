@@ -1335,6 +1335,9 @@ pub enum InstanceAutoRestartPolicy {
 pub enum InstanceMinimumCpuPlatform {
     /// An AMD Zen 3-compatible CPU platform.
     AmdMilan,
+
+    /// An AMD Zen 5-compatible CPU platform.
+    AmdTurin,
 }
 
 // AFFINITY GROUPS

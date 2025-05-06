@@ -2678,6 +2678,11 @@ pub(in crate::db::datastore) mod test {
             let possible_sleds = test_instance.find_targets(&datastore).await;
             assert_eq!(possible_sleds.len(), 4);
         }
+
+        test_instance.min_cpu_platform =
+            Some(InstanceMinimumCpuPlatform::AmdTurin);
+        let possible_sleds = test_instance.find_targets(&datastore).await;
+        assert_eq!(possible_sleds.len(), 2);
     }
 
     async fn lookup_physical_disk(

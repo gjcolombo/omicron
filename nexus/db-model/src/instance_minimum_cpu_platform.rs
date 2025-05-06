@@ -23,6 +23,7 @@ impl_enum_type!(
     pub enum InstanceMinimumCpuPlatform;
 
     AmdMilan => b"amd_milan"
+    AmdTurin => b"amd_turin"
 );
 
 impl InstanceMinimumCpuPlatform {
@@ -34,6 +35,7 @@ impl InstanceMinimumCpuPlatform {
             Self::AmdMilan => {
                 &[SledCpuFamily::AmdFamily19h, SledCpuFamily::AmdFamily1Ah]
             }
+            Self::AmdTurin => &[SledCpuFamily::AmdFamily1Ah],
         }
     }
 }
@@ -47,6 +49,7 @@ impl From<omicron_common::api::external::InstanceMinimumCpuPlatform>
         use omicron_common::api::external::InstanceMinimumCpuPlatform as ApiPlatform;
         match value {
             ApiPlatform::AmdMilan => Self::AmdMilan,
+            ApiPlatform::AmdTurin => Self::AmdTurin,
         }
     }
 }
@@ -57,6 +60,7 @@ impl From<InstanceMinimumCpuPlatform>
     fn from(value: InstanceMinimumCpuPlatform) -> Self {
         match value {
             InstanceMinimumCpuPlatform::AmdMilan => Self::AmdMilan,
+            InstanceMinimumCpuPlatform::AmdTurin => Self::AmdTurin,
         }
     }
 }

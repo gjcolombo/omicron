@@ -1170,7 +1170,8 @@ CREATE TYPE IF NOT EXISTS omicron.public.instance_auto_restart AS ENUM (
 );
 
 CREATE TYPE IF NOT EXISTS omicron.public.instance_min_cpu_platform AS ENUM (
-  'amd_milan'
+  'amd_milan',
+  'amd_turin'
 );
 
 /*
@@ -4432,7 +4433,8 @@ CREATE INDEX IF NOT EXISTS lookup_anti_affinity_group_instance_membership_by_ins
 
 CREATE TYPE IF NOT EXISTS omicron.public.vmm_cpu_platform AS ENUM (
   'sled_default',
-  'amd_milan'
+  'amd_milan',
+  'amd_turin'
 );
 
 -- Per-VMM state.
