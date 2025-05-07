@@ -1317,17 +1317,26 @@ pub enum InstanceAutoRestartPolicy {
 
 /// A minimum required CPU platform for an instance.
 ///
-/// If an instance specifies a minimum required CPU platform, its VMs may make
-/// use of all of the CPU features supplied by that minimum platform. In
-/// exchange, the control plane must ensure that the instance always runs on
-/// hosts whose CPUs support all of those features. This may cause an instance
-/// to be unable to start for want of capacity on a host with the required CPU
-/// features.
+/// When an instance specifies a minimum required CPU platform:
 ///
-/// If an instance does not specify a minimum CPU platform, then when it starts,
-/// the control plane selects a host for it and then supplies a CPU platform
-/// that is compatible with that host and that maximizes the number of hosts the
-/// instance could validly migrate to.
+/// - The system may expose (to the VM) new CPU features that are only present
+///   on that platform (or on newer platforms of the same lineage that also
+///   support those features).
+/// - The instance must run on hosts that have CPUs that support all the
+///   features of the supplied minimum platform.
+///
+/// That is, the instance is restricted to hosts that have the specified minimum
+/// host CPU type (or a more advanced, but still compatible, CPU), but in
+/// exchange the CPU features exposed by the minimum platform are available for
+/// the guest to use. Note that this may prevent an instance from starting (if
+/// the hosts it requires are full but there is capacity on other incompatible
+/// hosts).
+///
+/// If an instance does not specify a minimum required CPU platform, then when
+/// it starts, the control plane selects a host for the instance and then
+/// supplies the guest with the "minimum" CPU platform supported by that host.
+/// This maximizes the number of hosts that can run the VM if it later needs to
+/// migrate to another host.
 #[derive(
     Copy, Clone, Debug, Deserialize, Serialize, JsonSchema, Eq, PartialEq,
 )]
