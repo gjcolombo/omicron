@@ -2651,9 +2651,7 @@ pub(in crate::db::datastore) mod test {
 
     #[tokio::test]
     async fn sled_reservation_cpu_constraints() {
-        let logctx = dev::test_setup_log(
-            "sled_reservation_concurrent_space_requirement",
-        );
+        let logctx = dev::test_setup_log("sled_reservation_cpu_constraints");
         let db = TestDatabase::new_with_datastore(&logctx.log).await;
         let (opctx, datastore) = (db.opctx(), db.datastore());
         let (_authz_project, _project) =

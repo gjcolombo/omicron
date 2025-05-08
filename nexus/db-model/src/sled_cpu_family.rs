@@ -38,8 +38,9 @@ impl SledCpuFamily {
     pub fn minimum_compatible_platform(&self) -> crate::VmmCpuPlatform {
         match self {
             Self::Unknown => crate::VmmCpuPlatform::SledDefault,
-            Self::AmdFamily19h => crate::VmmCpuPlatform::AmdMilan,
-            Self::AmdFamily1Ah => crate::VmmCpuPlatform::SledDefault,
+            Self::AmdFamily19h | Self::AmdFamily1Ah => {
+                crate::VmmCpuPlatform::AmdMilan
+            }
         }
     }
 }

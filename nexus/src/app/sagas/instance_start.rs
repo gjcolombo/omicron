@@ -162,13 +162,19 @@ async fn sis_alloc_server(
     let reservoir_ram = params.db_instance.memory;
     let propolis_id = sagactx.lookup::<PropolisUuid>("propolis_id")?;
 
+    let mut constraints = db::model::SledReservationConstraintBuilder::new();
+    if let Some(min_cpu_platform) = params.db_instance.min_cpu_platform {
+        constraints = constraints
+            .cpu_families(min_cpu_platform.compatible_sled_cpu_families());
+    }
+
     let resource = super::instance_common::reserve_vmm_resources(
         osagactx.nexus(),
         InstanceUuid::from_untyped_uuid(params.db_instance.id()),
         propolis_id,
         u32::from(hardware_threads.0),
         reservoir_ram,
-        db::model::SledReservationConstraints::none(),
+        constraints.build(),
     )
     .await?;
 
