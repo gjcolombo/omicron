@@ -1257,6 +1257,7 @@ impl super::Nexus {
             .generate_vmm_spec(
                 &operation,
                 db_instance,
+                initial_vmm,
                 &disks,
                 &nics,
                 &ssh_keys,
