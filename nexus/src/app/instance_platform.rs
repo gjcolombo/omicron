@@ -589,13 +589,45 @@ fn cpuid_from_vmm_cpu_platform(
         cpuid_leaf!(0x80000021, 0x0000002D, 0x00000000, 0x00000000, 0x00000000),
     ];
 
-    let cpuid = match platform {
+    let mut cpuid = match platform {
         db::model::VmmCpuPlatform::SledDefault => return None,
         db::model::VmmCpuPlatform::AmdMilan
         | db::model::VmmCpuPlatform::AmdTurin => {
             Cpuid { entries: MILAN_CPUID.to_vec(), vendor: CpuidVendor::Amd }
         }
     };
+
+    // TODO: this is glorious but should not actually be here
+    if matches!(platform, db::model::VmmCpuPlatform::AmdTurin) {
+        const TURIN_BRAND_STRING: &[u8; 48] =
+            b"Oxide Cloud Computer Company Cloud Computer\0\0\0\0\0";
+
+        let mut chunks = TURIN_BRAND_STRING.chunks_exact(4);
+        cpuid.entries[12].eax =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[12].ebx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[12].ecx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[12].edx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[13].eax =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[13].ebx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[13].ecx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[13].edx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[14].eax =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[14].ebx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[14].ecx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+        cpuid.entries[14].edx =
+            u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
+    }
 
     Some(cpuid)
 }
