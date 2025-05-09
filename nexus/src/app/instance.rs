@@ -381,9 +381,15 @@ impl super::Nexus {
         let auto_restart_policy = params.auto_restart_policy.map(Into::into);
         let ncpus = params.ncpus.into();
         let memory = params.memory.into();
+        let min_cpu_platform = params.min_cpu_platform.map(Into::into);
 
-        let update =
-            InstanceUpdate { boot_disk_id, auto_restart_policy, ncpus, memory };
+        let update = InstanceUpdate {
+            boot_disk_id,
+            auto_restart_policy,
+            ncpus,
+            memory,
+            min_cpu_platform,
+        };
         self.datastore()
             .instance_reconfigure(opctx, &authz_instance, update)
             .await

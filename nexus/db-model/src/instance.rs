@@ -490,6 +490,9 @@ pub struct InstanceUpdate {
     #[diesel(column_name = boot_disk_id)]
     pub boot_disk_id: Option<Uuid>,
 
+    /// The instance's minimum required CPU platform.
+    pub min_cpu_platform: Option<InstanceMinimumCpuPlatform>,
+
     /// The auto-restart policy for this instance. If this is `None`, it will
     /// set the instance's auto-restart policy to `NULL`.
     #[diesel(column_name = auto_restart_policy)]

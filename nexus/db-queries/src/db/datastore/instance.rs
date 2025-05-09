@@ -46,6 +46,7 @@ use nexus_db_errors::public_error_from_diesel;
 use nexus_db_lookup::DbConnection;
 use nexus_db_lookup::LookupPath;
 use nexus_db_model::Disk;
+use nexus_db_model::InstanceMinimumCpuPlatform;
 use nexus_types::internal_api::background::ReincarnationReason;
 use omicron_common::api;
 use omicron_common::api::external;
@@ -1097,6 +1098,7 @@ impl DataStore {
                     auto_restart_policy,
                     ncpus,
                     memory,
+                    min_cpu_platform,
                 } = update.clone();
                 async move {
                     // Set the auto-restart policy.
@@ -1109,13 +1111,14 @@ impl DataStore {
                         .execute_async(&conn)
                         .await?;
 
-                    // Set vCPUs and memory size.
+                    // Set vCPUs, memory size, and minimum CPU platform.
                     self.instance_set_size_on_conn(
                         &conn,
                         &err,
                         &authz_instance,
                         ncpus,
                         memory,
+                        min_cpu_platform,
                     )
                     .await?;
 
@@ -1303,6 +1306,7 @@ impl DataStore {
         authz_instance: &authz::Instance,
         ncpus: InstanceCpuCount,
         memory: ByteCount,
+        min_cpu_platform: Option<InstanceMinimumCpuPlatform>,
     ) -> Result<(), diesel::result::Error> {
         use nexus_db_schema::schema::instance::dsl as instance_dsl;
 
@@ -1315,11 +1319,13 @@ impl DataStore {
             .filter(
                 instance_dsl::ncpus
                     .ne(ncpus)
-                    .or(instance_dsl::memory.ne(memory)),
+                    .or(instance_dsl::memory.ne(memory))
+                    .or(instance_dsl::min_cpu_platform.ne(min_cpu_platform)),
             )
             .set((
                 instance_dsl::ncpus.eq(ncpus),
                 instance_dsl::memory.eq(memory),
+                instance_dsl::min_cpu_platform.eq(min_cpu_platform),
             ))
             .check_if_exists::<Instance>(authz_instance.id())
             .execute_and_check(&conn)
