@@ -532,7 +532,7 @@ fn cpuid_from_vmm_cpu_platform(
 
     // See [RFD 314](https://314.rfd.oxide.computer/) section 6 for all the
     // gnarly details.
-    const MILAN_CPUID: [CpuidEntry; 32] = [
+    const MILAN_CPUID: [CpuidEntry; 31] = [
         cpuid_leaf!(0x0, 0x0000000D, 0x68747541, 0x444D4163, 0x69746E65),
         cpuid_leaf!(0x1, 0x00A00F11, 0x00000800, 0xF6F83203, 0x078BFBFF),
         cpuid_leaf!(0x5, 0x00000000, 0x00000000, 0x00000000, 0x00000000),
@@ -557,9 +557,9 @@ fn cpuid_from_vmm_cpu_platform(
         ),
         cpuid_leaf!(0x80000000, 0x80000021, 0x68747541, 0x444D4163, 0x69746E65),
         cpuid_leaf!(0x80000001, 0x00A00F11, 0x40000000, 0x444001F0, 0x27D3FBFF),
-        cpuid_leaf!(0x80000002, 0x73736F72, 0x726F6365, 0x31332050, 0x43203737),
-        cpuid_leaf!(0x80000003, 0x20455059, 0x00414D44, 0x00000000, 0x00000000),
-        cpuid_leaf!(0x80000004, 0x00000000, 0x00000000, 0x00000000, 0x00000000),
+        cpuid_leaf!(0x80000002, 0x20414D44, 0x43595045, 0x31373720, 0x36205033),
+        cpuid_leaf!(0x80000003, 0x6F432D34, 0x50206572, 0x65636F74, 0x726F7373),
+        cpuid_leaf!(0x80000004, 0x20202020, 0x20202020, 0x20202020, 0x00202020),
         cpuid_leaf!(0x80000005, 0xFF40FF40, 0xFF40FF40, 0x20080140, 0x20080140),
         cpuid_leaf!(0x80000006, 0x08002200, 0x68004200, 0x02006140, 0x01009140),
         cpuid_leaf!(0x80000007, 0x00000000, 0x00000000, 0x00000000, 0x00000100),
@@ -580,9 +580,6 @@ fn cpuid_from_vmm_cpu_platform(
         ),
         cpuid_subleaf!(
             0x8000001D, 0x3, 0x00000163, 0x03C0003F, 0x00007FFF, 0x00000001
-        ),
-        cpuid_subleaf!(
-            0x8000001D, 0x4, 0x00000000, 0x00000000, 0x00000000, 0x00000000
         ),
         cpuid_leaf!(0x8000001E, 0x00000000, 0x00000100, 0x00000000, 0x00000000),
         cpuid_leaf!(0x8000001F, 0x00000000, 0x00000000, 0x00000000, 0x00000000),
